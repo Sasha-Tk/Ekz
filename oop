@@ -1,0 +1,471 @@
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+class Publication
+{
+private:
+	string title;
+	int number_of_pages;
+	int number_of_сopies;
+	double height_of_page;
+	double width_of_page;
+public:
+	Publication();
+	Publication(string title, int number_of_pages, int number_of_copies, double height_of_page, double width_of_page);
+	Publication(const Publication& other);
+
+	virtual ~Publication();
+
+	void SetTitle(string title);
+	void SetNumberOfPages(int number_of_pages);
+	void SetNumberOfCopies(int number_of_copies);
+	void SetHeightOfPage(double height_of_page);
+	void SetWidthOfPage(double width_of_page);
+
+	string GetTitle() const;
+	int GetNumberOfPages() const;
+	int GetNumberOfCopies() const;
+	double GetHeightOfPage() const;
+	double GetWidthOfPage() const;
+
+	friend istream& operator>>(istream& in, Publication& obj);
+	friend ostream& operator<<(ostream& out, Publication& obj);
+	virtual void PrintInfo(ostream& out) = 0;
+	virtual void GetInfo(istream& in) = 0;
+
+	virtual double PaperCost() const = 0;
+	static double TotalCost(const Publication** arr, int n);
+};
+
+Publication::Publication()
+{
+	this->title = "";
+	this->number_of_pages = 0;
+	this->number_of_сopies = 0;
+	this->height_of_page = 0;
+	this->width_of_page = 0;
+}
+
+Publication::Publication(string title, int number_of_pages, int number_of_copies, double height_of_page, double width_of_page)
+{
+	this->title = title;
+	this->number_of_pages = number_of_pages;
+	this->number_of_сopies = number_of_copies;
+	this->height_of_page = height_of_page;
+	this->width_of_page = width_of_page;
+}
+
+Publication::Publication(const Publication& other)
+{
+	this->title = other.title;
+	this->number_of_pages = other.number_of_pages;
+	this->number_of_сopies = other.number_of_сopies;
+	this->height_of_page = other.height_of_page;
+	this->width_of_page = other.width_of_page;
+}
+
+Publication::~Publication()
+{
+
+}
+
+void Publication::SetTitle(string title)
+{
+	this->title = title;
+}
+
+void Publication::SetNumberOfPages(int number_of_pages)
+{
+	this->number_of_pages = number_of_pages;
+}
+
+void Publication::SetNumberOfCopies(int number_of_copies)
+{
+	this->number_of_сopies = number_of_copies;
+}
+
+void Publication::SetHeightOfPage(double height_of_page)
+{
+	this->height_of_page = height_of_page;
+}
+
+void Publication::SetWidthOfPage(double width_of_page)
+{
+	this->width_of_page = width_of_page;
+}
+
+string Publication::GetTitle() const
+{
+	return this->title;
+}
+
+int Publication::GetNumberOfPages() const
+{
+	return this->number_of_pages;
+}
+
+int Publication::GetNumberOfCopies() const
+{
+	return this->number_of_сopies;
+}
+
+double Publication::GetHeightOfPage() const
+{
+	return this->height_of_page;
+}
+
+double Publication::GetWidthOfPage() const
+{
+	return this->width_of_page;
+}
+
+double Publication::TotalCost(const Publication** arr, int n)
+{
+	double total = 0.0;
+	for (int i = 0; i < n; i++)
+	{
+		total += arr[i]->PaperCost();
+	}
+	return total;
+}
+
+
+class Book : public Publication
+{
+private:
+	string author;
+
+public:
+	Book(string author, string title, int number_of_pages, int number_of_copies, double height_of_page, double width_of_page);
+	Book();
+	~Book();
+	void SetAuthor(string author);
+	string GetAuthor() const;
+	void GetInfo(istream& in) override;
+	void PrintInfo(ostream& out) override;
+	friend istream& operator>>(istream& in, Book& obj);
+	friend ostream& operator<<(ostream& out, Book& obj);
+	double PaperCost() const override;
+};
+
+Book::Book(string author, string title, int number_of_pages, int number_of_copies, double height_of_page, double width_of_page)
+	:Publication(title, number_of_pages, number_of_copies, height_of_page, width_of_page)
+{
+	this->author = author;
+}
+
+Book::Book() : Publication()
+{
+	this->author = "";
+}
+
+Book::~Book()
+{
+
+}
+
+void Book::SetAuthor(string author)
+{
+	this->author = author;
+}
+
+string Book::GetAuthor() const
+{
+	return this->author;
+}
+
+void Book::GetInfo(istream& in)
+{
+	string author, title;
+	int number_of_pages, number_of_copies;
+	double height_of_page, width_of_page;
+	in
+		>> author
+		>> title
+		>> number_of_pages
+		>> number_of_copies
+		>> height_of_page
+		>> width_of_page;
+	this->SetAuthor(author);
+	this->SetTitle(title);
+	this->SetNumberOfPages(number_of_pages);
+	this->SetNumberOfCopies(number_of_copies);
+	this->SetHeightOfPage(height_of_page);
+	this->SetWidthOfPage(width_of_page);
+}
+
+void Book::PrintInfo(ostream& out)
+{
+	out
+		<< "\nІнформація про книгу:"
+		<< "\n\tавтор: " << this->GetAuthor()
+		<< "\n\tназва: " << this->GetTitle()
+		<< "\n\tкількість примірників: " << this->GetNumberOfCopies()
+		<< "\n\tкількість сторінок: " << this->GetNumberOfPages()
+		<< "\n\tрозмір сторінки: " << this->GetHeightOfPage() << "x" << this->GetWidthOfPage()
+		<< "\n\tвитрата паперу в кв.м: " << this->PaperCost();
+}
+
+double Book::PaperCost() const
+{
+	return this->GetHeightOfPage() * this->GetWidthOfPage()*this->GetNumberOfPages()*this->GetNumberOfCopies();
+}
+
+istream& operator>>(istream& in, Publication& obj)
+{
+	obj.GetInfo(in);
+	return in;
+}
+
+ostream& operator<<(ostream& out, Publication& obj)
+{
+	obj.PrintInfo(out);
+	return out;
+}
+
+istream& operator>>(istream& in, Book& obj)
+{
+	obj.GetInfo(in);
+	return in;
+}
+
+ostream& operator<<(ostream& out, Book& obj)
+{
+
+	obj.PrintInfo(out);
+	return out;
+}
+
+class Magazine : public Publication
+{
+private:
+	int frequency_of_release;
+
+public:
+	Magazine();
+	Magazine(string title, int number_of_pages, int number_of_copies, double height_of_page, double width_of_page, int frequency_of_release);
+	Magazine(const Magazine& other);
+	~Magazine();
+	void SetFrequencyOfRelease(int frequency_of_release);
+	int GetFrequencyOfRelease()const;
+	void GetInfo(istream& in)override;
+	void PrintInfo(ostream& out) override;
+	double PaperCost() const override;
+
+};
+
+Magazine::Magazine()
+{
+	this->frequency_of_release = 0;
+	this->SetHeightOfPage(0);
+	this->SetNumberOfCopies(0);
+	this->SetWidthOfPage(0);
+	this->SetNumberOfPages(0);
+	this->SetTitle("");
+}
+
+Magazine::Magazine(string title, int number_of_pages, int number_of_copies, double height_of_page, double width_of_page, int frequency_of_release)
+	: Publication(title, number_of_pages, number_of_copies, height_of_page, width_of_page)
+{
+	this->frequency_of_release = frequency_of_release;
+}
+
+Magazine::Magazine(const Magazine& other)
+{
+	this->frequency_of_release = other.GetFrequencyOfRelease();
+}
+
+Magazine::~Magazine()
+{
+
+}
+
+void Magazine::SetFrequencyOfRelease(int frequency_of_release)
+{
+	this->frequency_of_release = frequency_of_release;
+}
+
+int Magazine::GetFrequencyOfRelease()const
+{
+	return this->frequency_of_release;
+}
+
+void Magazine::GetInfo(istream& in)
+{
+	string title;
+	int number_of_pages, number_of_copies, frequency_of_release; 
+	double height_of_page, width_of_page;
+	in
+		>> title
+		>> number_of_pages
+		>> number_of_copies
+		>> height_of_page
+		>> width_of_page
+		>> frequency_of_release;
+	this->SetTitle(title);
+	this->SetNumberOfPages(number_of_pages);
+	this->SetNumberOfCopies(number_of_copies);
+	this->SetHeightOfPage(height_of_page);
+	this->SetWidthOfPage(width_of_page);
+	this->SetFrequencyOfRelease(frequency_of_release);
+}
+
+void Magazine::PrintInfo(ostream& out)
+{
+	out
+		<< "\nІнформація про журнал:"
+		<< "\n\tназва: " << this->GetTitle()
+		<< "\n\tкількість примірників: " << this->GetNumberOfCopies()
+		<< "\n\tкількість сторінок: " << this->GetNumberOfPages()
+		<< "\n\tрозмір сторінки: " << this->GetHeightOfPage() << "x" << this->GetWidthOfPage()
+		<< "\n\tперіодичність виходу за місяць: " << this->GetFrequencyOfRelease()
+		<< "\n\tвитрата паперу в кв.м: " << this->PaperCost();
+}
+
+double Magazine::PaperCost() const
+{
+	return this->GetHeightOfPage() * this->GetWidthOfPage() * this->GetNumberOfPages() * this->GetNumberOfCopies();
+}
+
+class Newspaper : public Publication
+{
+private:
+	int frequency_of_release;
+
+public:
+	Newspaper();
+	Newspaper(string title, int number_of_pages, int number_of_copies, double height_of_page, double width_of_page, int frequency_of_release);
+	Newspaper(const Newspaper& other);
+	~Newspaper();
+	void SetFrequencyOfRelease(int frequency_of_release);
+	int GetFrequencyOfRelease()const;
+	void GetInfo(istream& in)override;
+	void PrintInfo(ostream& out) override;
+	double PaperCost() const override;
+};
+
+Newspaper::Newspaper()
+{
+		this->frequency_of_release = 0;
+		this->SetHeightOfPage(0);
+		this->SetNumberOfCopies(0);
+		this->SetWidthOfPage(0);
+		this->SetNumberOfPages(0);
+		this->SetTitle("");
+}
+
+Newspaper::Newspaper(string title, int number_of_pages, int number_of_copies, double height_of_page, double width_of_page, int frequency_of_release)
+	: Publication(title, number_of_pages, number_of_copies, height_of_page, width_of_page)
+{
+	this->frequency_of_release = frequency_of_release;
+}
+
+Newspaper::Newspaper(const Newspaper& other)
+{
+	this->frequency_of_release = other.GetFrequencyOfRelease();
+}
+
+Newspaper::~Newspaper()
+{
+
+}
+
+void Newspaper::SetFrequencyOfRelease(int frequency_of_release)
+{
+	this->frequency_of_release = frequency_of_release;
+}
+
+int Newspaper::GetFrequencyOfRelease()const
+{
+	return this->frequency_of_release;
+}
+
+void Newspaper::GetInfo(istream& in)
+{
+	string title;
+	int number_of_pages, number_of_copies, frequency_of_release;
+	double height_of_page, width_of_page;
+	in
+		>> title
+		>> number_of_pages
+		>> number_of_copies
+		>> height_of_page
+		>> width_of_page
+		>> frequency_of_release;
+	this->SetTitle(title);
+	this->SetNumberOfPages(number_of_pages);
+	this->SetNumberOfCopies(number_of_copies);
+	this->SetHeightOfPage(height_of_page);
+	this->SetWidthOfPage(width_of_page);
+	this->SetFrequencyOfRelease(frequency_of_release);
+}
+
+void Newspaper::PrintInfo(ostream& out)
+{
+	out
+		<< "\nІнформація про газету:"
+		<< "\n\tназва: " << this->GetTitle()
+		<< "\n\tкількість примірників: " << this->GetNumberOfCopies()
+		<< "\n\tкількість сторінок: " << this->GetNumberOfPages()
+		<< "\n\tрозмір сторінки: " << this->GetHeightOfPage() << "x" << this->GetWidthOfPage()
+		<< "\n\tперіодичність виходу за місяць: " << this->GetFrequencyOfRelease()
+		<< "\n\tвитрата паперу в кв.м: " << this->PaperCost();
+}
+
+double Newspaper::PaperCost() const
+{
+	return this->GetHeightOfPage() * this->GetWidthOfPage() * this->GetNumberOfPages() * this->GetNumberOfCopies() * this->GetFrequencyOfRelease();
+}
+
+int main(void)
+{
+	system("chcp 1251");
+	int n, next;
+	cout << "\nВведіть кількість елементів: ";
+	cin >> n;
+	Publication** arr = new Publication * [n];
+	for (int i = 0; i < n; i++)
+	{
+		cout << "\nЩоб ввести інформацію про книгу - 1, журнал - 2, газету - 3\nВибір: ";
+		cin >> next;
+		switch (next)
+		{
+		case 1: 
+		{
+			cout << "\nВведіть інформацію про книгу (автор, назва, кількість примірників, кількість сторінок, висота сторінки, ширина сторінки):\n";
+			arr[i] = new Book;
+			cin >> *arr[i];
+			break;
+		}
+		case 2:
+		{
+			cout << "\nВведіть інформацію про журнал (назва, кількість примірників, кількість сторінок, висота сторінки, ширина сторінки, періодичність виходу):\n";
+			arr[i] = new Magazine;
+			cin >> *arr[i];
+			break;
+		}
+		case 3:
+		{
+			cout << "\nВведіть інформацію про газету (назва, кількість примірників, кількість сторінок, висота сторінки, ширина сторінки, періодичність виходу):\n";
+			arr[i] = new Newspaper;
+			cin >> *arr[i];
+			break;
+		}
+
+		default:
+			cout << "\nНеправильно обраний елемент!";
+			return 0;
+		}
+	}
+	for (int i = 0; i < n; i++)
+	{
+		cout << *arr[i];
+	}
+	for (int i = 0; i < n; i++)
+	{
+		delete arr[i];
+	}
+	delete []arr;
+}
